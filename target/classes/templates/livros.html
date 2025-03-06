@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head th:replace="layout :: head">
+    <title>Livros</title>
+  </head>
+  <body>
+    <nav th:replace="layout :: nav"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0"><i class="fas fa-book me-2"></i>Livros</h1>
+        <a href="/livro-form" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i> Novo Livro
+        </a>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Lista de Livros</span>
+                <div class="input-group" style="max-width: 300px">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="form-control"
+                    placeholder="Buscar livros..."
+                  />
+                  <button class="btn btn-outline-light" type="button">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Título</th>
+                      <th>Autor</th>
+                      <th>Editora</th>
+                      <th>Ano</th>
+                      <th>ISBN</th>
+                      <th>Páginas</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="livro : ${livros}">
+                      <td th:text="${livro.id}"></td>
+                      <td th:text="${livro.titulo}"></td>
+                      <td th:text="${livro.autor}"></td>
+                      <td th:text="${livro.editora}"></td>
+                      <td th:text="${livro.anoPublicacao}"></td>
+                      <td th:text="${livro.isbn}"></td>
+                      <td th:text="${livro.numeroPaginas}"></td>
+                      <td>
+                        <div class="btn-group">
+                          <a
+                            th:href="@{'/livro-editar/' + ${livro.id}}"
+                            class="btn btn-sm btn-warning me-1"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <button
+                            class="btn btn-sm btn-danger delete-livro"
+                            th:data-id="${livro.id}"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(livros)}">
+                      <td colspan="8" class="text-center">
+                        Nenhum livro cadastrado
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Tem certeza que deseja excluir este livro?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDelete">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout :: footer"></footer>
+
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let livroIdToDelete;
+
+        $('.delete-livro').click(function () {
+          livroIdToDelete = $(this).attr('data-id');
+          $('#deleteModal').modal('show');
+        });
+
+        $('#confirmDelete').click(function () {
+          $.ajax({
+            url: '/livros/' + livroIdToDelete,
+            type: 'DELETE',
+            success: function () {
+              $('#deleteModal').modal('hide');
+              location.reload();
+            },
+          });
+        });
+
+        $('#searchInput').on('keyup', function () {
+          const value = $(this).val().toLowerCase();
+          $('tbody tr').filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

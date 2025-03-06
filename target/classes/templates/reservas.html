@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head th:replace="layout :: head">
+    <title>Reservas</title>
+  </head>
+  <body>
+    <nav th:replace="layout :: nav"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Reservas</h1>
+        <a href="/reserva-form" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i> Nova Reserva
+        </a>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Filtrar Reservas</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="statusFilter" class="form-label">Status</label>
+                  <select id="statusFilter" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="CONFIRMADA">Confirmada</option>
+                    <option value="FINALIZADA">Finalizada</option>
+                  </select>
+                </div>
+                <div class="col-md-8 mb-3">
+                  <label for="searchInput" class="form-label"
+                    >Buscar por Cliente</label
+                  >
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="form-control"
+                    placeholder="Nome do cliente..."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <span>Lista de Reservas</span>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Livro</th>
+                      <th>Cliente</th>
+                      <th>Data</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="reserva : ${reservas}">
+                      <td th:text="${reserva.id}"></td>
+                      <td th:text="${reserva.livro.titulo}"></td>
+                      <td>
+                        <span th:text="${reserva.nomeCliente}"></span><br />
+                        <small th:text="${reserva.emailCliente}"></small>
+                      </td>
+                      <td
+                        th:text="${#temporals.format(reserva.dataReserva, 'dd/MM/yyyy')}"
+                      ></td>
+                      <td>
+                        <span
+                          th:if="${reserva.status.name() == 'PENDENTE'}"
+                          class="badge badge-pendente"
+                          >Pendente</span
+                        >
+                        <span
+                          th:if="${reserva.status.name() == 'CONFIRMADA'}"
+                          class="badge badge-confirmada"
+                          >Confirmada</span
+                        >
+                        <span
+                          th:if="${reserva.status.name() == 'FINALIZADA'}"
+                          class="badge badge-finalizada"
+                          >Finalizada</span
+                        >
+                      </td>
+                      <td>
+                        <div class="btn-group">
+                          <a
+                            th:href="@{'/reserva-editar/' + ${reserva.id}}"
+                            class="btn btn-sm btn-warning me-1"
+                            title="Editar"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <button
+                            th:if="${reserva.status.name() == 'PENDENTE'}"
+                            class="btn btn-sm btn-success me-1 confirmar-reserva"
+                            th:data-id="${reserva.id}"
+                            title="Confirmar"
+                          >
+                            <i class="fas fa-check"></i>
+                          </button>
+                          <button
+                            th:if="${reserva.status.name() == 'CONFIRMADA'}"
+                            class="btn btn-sm btn-info me-1 finalizar-reserva"
+                            th:data-id="${reserva.id}"
+                            title="Finalizar"
+                          >
+                            <i class="fas fa-flag-checkered"></i>
+                          </button>
+                          <button
+                            class="btn btn-sm btn-danger delete-reserva"
+                            th:data-id="${reserva.id}"
+                            title="Excluir"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(reservas)}">
+                      <td colspan="6" class="text-center">
+                        Nenhuma reserva cadastrada
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Confirmar Exclusão</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Tem certeza que deseja excluir esta reserva?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDelete">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout :: footer"></footer>
+
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        let reservaIdToDelete;
+
+        $('.delete-reserva').click(function () {
+          reservaIdToDelete = $(this).attr('data-id');
+          $('#deleteModal').modal('show');
+        });
+
+        $('#confirmDelete').click(function () {
+          $.ajax({
+            url: '/reservas/' + reservaIdToDelete,
+            type: 'DELETE',
+            success: function () {
+              $('#deleteModal').modal('hide');
+              location.reload();
+            },
+          });
+        });
+
+        $('.confirmar-reserva').click(function () {
+          const reservaId = $(this).attr('data-id');
+          $.ajax({
+            url: '/reservas/' + reservaId + '/confirmar',
+            type: 'PATCH',
+            success: function () {
+              location.reload();
+            },
+          });
+        });
+
+        $('.finalizar-reserva').click(function () {
+          const reservaId = $(this).attr('data-id');
+          $.ajax({
+            url: '/reservas/' + reservaId + '/finalizar',
+            type: 'PATCH',
+            success: function () {
+              location.reload();
+            },
+          });
+        });
+
+        $('#searchInput').on('keyup', function () {
+          filterReservas();
+        });
+
+        $('#statusFilter').on('change', function () {
+          filterReservas();
+        });
+
+        function filterReservas() {
+          const searchValue = $('#searchInput').val().toLowerCase();
+          const statusValue = $('#statusFilter').val();
+
+          $('tbody tr').each(function () {
+            const row = $(this);
+            if (row.find('td').length <= 1) return; // Skip "no data" row
+
+            const clienteText = row
+              .find('td:nth-child(3)')
+              .text()
+              .toLowerCase();
+            const statusText = row.find('td:nth-child(5)').text().toLowerCase();
+
+            const matchesSearch = clienteText.indexOf(searchValue) > -1;
+            const matchesStatus =
+              statusValue === '' ||
+              statusText.indexOf(statusValue.toLowerCase()) > -1;
+
+            row.toggle(matchesSearch && matchesStatus);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

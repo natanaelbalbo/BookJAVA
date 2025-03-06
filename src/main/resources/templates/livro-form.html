@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head th:replace="layout :: head">
+    <title>Formulário de Livro</title>
+  </head>
+  <body>
+    <nav th:replace="layout :: nav"></nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+          <i class="fas fa-book me-2"></i>
+          <span th:if="${livro.id == null}">Novo Livro</span>
+          <span th:unless="${livro.id == null}">Editar Livro</span>
+        </h1>
+        <a href="/livros-page" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <span th:if="${livro.id == null}">Cadastrar Novo Livro</span>
+              <span th:unless="${livro.id == null}"
+                >Editar Livro #<span th:text="${livro.id}"></span
+              ></span>
+            </div>
+            <div class="card-body">
+              <form id="livroForm">
+                <input type="hidden" id="livroId" th:value="${livro.id}" />
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="titulo" class="form-label">Título*</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="titulo"
+                      th:value="${livro.titulo}"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="autor" class="form-label">Autor*</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="autor"
+                      th:value="${livro.autor}"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="editora" class="form-label">Editora</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="editora"
+                      th:value="${livro.editora}"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="anoPublicacao" class="form-label"
+                      >Ano de Publicação</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="anoPublicacao"
+                      th:value="${livro.anoPublicacao}"
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="isbn" class="form-label">ISBN</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="isbn"
+                      th:value="${livro.isbn}"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="numeroPaginas" class="form-label"
+                      >Número de Páginas</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="numeroPaginas"
+                      th:value="${livro.numeroPaginas}"
+                    />
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button
+                    type="button"
+                    class="btn btn-secondary me-md-2"
+                    onclick="window.location.href='/livros-page'"
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout :: footer"></footer>
+
+    <script th:inline="javascript">
+      $(document).ready(function () {
+        $('#livroForm').submit(function (e) {
+          e.preventDefault();
+
+          const livro = {
+            titulo: $('#titulo').val(),
+            autor: $('#autor').val(),
+            editora: $('#editora').val(),
+            anoPublicacao: $('#anoPublicacao').val()
+              ? parseInt($('#anoPublicacao').val())
+              : null,
+            isbn: $('#isbn').val(),
+            numeroPaginas: $('#numeroPaginas').val()
+              ? parseInt($('#numeroPaginas').val())
+              : null,
+          };
+
+          const livroId = $('#livroId').val();
+          const method = livroId ? 'PUT' : 'POST';
+          const url = livroId ? '/livros/' + livroId : '/livros';
+
+          $.ajax({
+            url: url,
+            type: method,
+            contentType: 'application/json',
+            data: JSON.stringify(livro),
+            success: function () {
+              window.location.href = '/livros-page';
+            },
+            error: function (xhr) {
+              alert('Erro ao salvar livro: ' + xhr.responseText);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
