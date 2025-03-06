@@ -1,71 +1,72 @@
-# Sistema de Biblioteca
+# Sistema de Gestão Bibliotecária
 
-Sistema de gerenciamento de livros e reservas para uma biblioteca, desenvolvido com Spring Boot.
+Um sistema projetado para organizar livros e gerenciar reservas em uma biblioteca, construído utilizando o framework Spring Boot.
 
-## Funcionalidades
+## Recursos Principais
 
-- Cadastro, edição, listagem e exclusão de livros
-- Gerenciamento de reservas de livros com diferentes status:
-  - **PENDENTE**: A reserva foi criada, mas ainda não confirmada
-  - **CONFIRMADA**: A reserva foi confirmada
-  - **FINALIZADA**: A reserva foi concluída (check-out ou evento ocorrido)
-- Interface web responsiva e moderna
+- Administração de livros: inclusão, alteração, consulta e remoção.
+- Controle de reservas com os seguintes estados:
+  - **Aguardando**: Reserva registrada, mas pendente de aprovação.
+  - **Aprovada**: Reserva validada e confirmada.
+  - **Concluída**: Reserva finalizada, seja por retirada ou término do processo.
+- Interface web adaptável e com design atualizado.
 
-## Tecnologias Utilizadas
+## Tecnologias Empregadas
 
-- Java 17
-- Spring Boot 3.2.2
-- Spring Data JPA
-- Thymeleaf
-- H2 Database (banco de dados em memória)
-- Bootstrap 5
-- jQuery
-- Font Awesome
+- Java (versão 17)
+- Spring Boot (versão 3.2.2)
+- Spring Data JPA para persistência de dados
+- Thymeleaf como motor de templates
+- Banco de dados H2 (em memória)
+- Bootstrap 5 para estilização
+- jQuery para interatividade
+- Font Awesome para ícones
 
-## Como Executar
+## Instruções para Execução
 
-1. Clone o repositório
-2. Navegue até a pasta do projeto
-3. Execute o comando: `./mvnw spring-boot:run`
-4. Acesse a aplicação em: `http://localhost:8080`
-5. Para acessar o console H2: `http://localhost:8080/h2-console`
-   - JDBC URL: `jdbc:h2:mem:testdb`
+1. Faça o clone do repositório.
+2. Entre no diretório do projeto.
+3. Rode o comando: `./mvnw spring-boot:run`.
+4. Abra o navegador e acesse: `http://localhost:8080`.
+5. Para visualizar o banco H2, vá até: `http://localhost:8080/h2-console`.
+   - URL JDBC: `jdbc:h2:mem:testdb`
    - Usuário: `sa`
-   - Senha: (deixe em branco)
+   - Senha: (sem preenchimento)
 
-## Estrutura do Projeto
+## Organização do Projeto
 
-- `model`: Entidades JPA (Livro, Reserva)
-- `repository`: Interfaces de repositório Spring Data
-- `service`: Camada de serviço com regras de negócio
-- `controller`: Controladores REST e Web
-- `resources/templates`: Templates Thymeleaf para a interface web
+- `model`: Classes que representam as entidades (Livro e Reserva).
+- `repository`: Interfaces para acesso a dados com Spring Data.
+- `service`: Lógica de negócios encapsulada.
+- `controller`: Camada de controle para endpoints REST e páginas web.
+- `resources/templates`: Arquivos Thymeleaf para renderização das views.
 
-## Dados de Teste
+## Dados Iniciais
 
-O sistema é inicializado com alguns livros e reservas para teste.
+Ao iniciar, o sistema carrega automaticamente alguns livros e reservas de exemplo para facilitar os testes.
 
-## API REST
+## Endpoints da API REST
 
-O sistema também disponibiliza endpoints REST para integração:
+A aplicação oferece uma API para integração com outros sistemas:
 
-### Livros
+### Gerenciamento de Livros
 
-- `GET /livros`: Lista todos os livros
-- `GET /livros/{id}`: Busca um livro por ID
-- `POST /livros`: Cria um novo livro
-- `PUT /livros/{id}`: Atualiza um livro existente
-- `DELETE /livros/{id}`: Remove um livro
+- `GET /livros`: Retorna a lista completa de livros.
+- `GET /livros/{id}`: Consulta um livro específico pelo ID.
+- `POST /livros`: Adiciona um novo livro.
+- `PUT /livros/{id}`: Modifica os dados de um livro existente.
+- `DELETE /livros/{id}`: Exclui um livro.
 
-### Reservas
+### Gerenciamento de Reservas
 
-- `GET /reservas`: Lista todas as reservas
-- `GET /reservas/{id}`: Busca uma reserva por ID
-- `GET /reservas/livro/{livroId}`: Lista reservas por livro
-- `GET /reservas/status/{status}`: Lista reservas por status
-- `GET /reservas/cliente?nome={nome}`: Busca reservas por nome do cliente
-- `POST /reservas`: Cria uma nova reserva
-- `PUT /reservas/{id}`: Atualiza uma reserva existente
-- `PATCH /reservas/{id}/confirmar`: Confirma uma reserva
-- `PATCH /reservas/{id}/finalizar`: Finaliza uma reserva
-- `DELETE /reservas/{id}`: Remove uma reserva
+- `GET /reservas`: Exibe todas as reservas cadastradas.
+- `GET /reservas/{id}`: Retorna uma reserva específica pelo ID.
+- `GET /reservas/livro/{livroId}`: Filtra reservas associadas a um livro.
+- `GET /reservas/status/{status}`: Lista reservas conforme o estado informado.
+- `GET /reservas/cliente?nome={nome}`: Pesquisa reservas pelo nome do cliente.
+- `POST /reservas`: Registra uma nova reserva.
+- `PUT /reservas/{id}`: Atualiza uma reserva já existente.
+- `PATCH /reservas/{id}/confirmar`: Altera o status para "Aprovada".
+- `PATCH /reservas/{id}/finalizar`: Define a reserva como "Concluída".
+- `DELETE /reservas/{id}`: Remove uma reserva.
+
